@@ -45,9 +45,6 @@
 #include <winver.h>
 
 
-static char* GetCfgFromFile(const char* pszName, const char* pszFile);
-static char* GetScriptPaths(void);
-static char* FindScriptModule(const char* pszName, const char* pszPaths);
 static bool CheckFileVersion(const char* pszFile, ulong dwVersHigh, ulong dwVersLow);
 static void DoSuccess(int iObjId);
 static void DoFailure(int iObjId);
@@ -95,7 +92,6 @@ long __stdcall cScr_VersionCheck::ReceiveMessage(sScrMsg* pMsg, sMultiParm*, eSc
 				return 0;
 			}
 
-			std::unique_ptr<char> pszScriptPaths(GetScriptPaths());
 			std::unique_ptr<char> pszParams(GetObjectParamsCompatible(ObjId()));
 			char* pszScript;
 			char* pszToken = pszParams.get();
@@ -121,8 +117,24 @@ long __stdcall cScr_VersionCheck::ReceiveMessage(sScrMsg* pMsg, sMultiParm*, eSc
 					}
 					*pszVers = '\0';
 				}
-				std::auto_ptr<char> pszScriptFile(FindScriptModule(pszScript, pszScriptPaths.get()));
-				if (!pszScriptFile.get())
+
+				// FindFileInPath will fail if the script path length exceeds MAX_PATH.
+				// Let's assume that will not happen under reasonable circumstances.
+				SService<IEngineSrv> pVers(g_pScriptManager);
+				bool bScrFound = false;
+				cScrStr scrPath;
+				if (!::strchr(pszScript, '.'))
+				{
+					char pszScriptWithExt[::strlen(pszScript)+5];
+					::strcpy(pszScriptWithExt, pszScript);
+					::strcat(pszScriptWithExt, ".osm");
+					bScrFound = pVers->FindFileInPath("script_module_path", pszScriptWithExt, scrPath);
+				}
+				else
+				{
+					bScrFound = pVers->FindFileInPath("script_module_path", pszScript, scrPath);
+				}
+				if(!bScrFound)
 				{
 					DoFailure(ObjId());
 					return 0;
@@ -131,7 +143,7 @@ long __stdcall cScr_VersionCheck::ReceiveMessage(sScrMsg* pMsg, sMultiParm*, eSc
 				{
 					continue;
 				}
-				if (!CheckFileVersion(pszScriptFile.get(), scrVersHigh, scrVersLow))
+				if (!CheckFileVersion(scrPath, scrVersHigh, scrVersLow))
 				{
 					DoFailure(ObjId());
 					return 0;
@@ -147,142 +159,11 @@ long __stdcall cScr_VersionCheck::ReceiveMessage(sScrMsg* pMsg, sMultiParm*, eSc
 				return 0;
 			}
 		}
-		}
+	}
 	catch (...)
 	{
 	}
 	return 0;
-}
-
-
-char* GetCfgFromFile(const char* pszName, const char* pszFile)
-{
-	char buffer[140];
-	char* value = NULL;
-	HANDLE hCfgFile = ::CreateFileA(pszFile, GENERIC_READ, FILE_SHARE_READ, NULL,
-					OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hCfgFile != INVALID_HANDLE_VALUE)
-	{
-		ulong dwCfgLen = ::strlen(pszName);
-		DWORD dwBytes = 0;
-		DWORD dwAvail = sizeof(buffer);
-		char* startp = buffer;
-		while (::ReadFile(hCfgFile, startp, dwAvail-1, &dwBytes, NULL))
-		{
-			char* line = buffer;
-			char* endp = startp + dwBytes;
-			*endp = '\0';
-			while (line < endp)
-			{
-				char* endl = ::strchr(line, '\n');
-				if (!endl)
-				{
-					if (dwBytes != 0)
-					{
-						dwBytes = endp - line;
-						::memmove(buffer, line, dwBytes);
-						startp = buffer + dwBytes;
-						dwAvail = sizeof(buffer) - dwBytes;
-						goto parseCfgContinue;
-					}
-				}
-				else
-					*endl++ = '\0';
-
-				if (!::strnicmp(line,pszName,dwCfgLen) && ::isspace(line[dwCfgLen]))
-				{
-					char* l = &line[dwCfgLen+1];
-					while (::isspace(*l)) ++l;
-					char* k = l + strlen(l) - 1;
-					while (::isspace(*k)) --k;
-					++k;
-					value = new(std::nothrow) char[k - l + 1];
-					if (value)
-					{
-						::strncpy(value,l,k - l);
-						value[k-l] = '\0';
-					}
-					goto parseCfgEnd;
-				}
-
-				if ((line = endl) == NULL)
-					break;
-			}
-
-			if (dwBytes == 0)
-				break;
-			dwAvail = sizeof(buffer);
-			startp = buffer;
-	parseCfgContinue:
-			continue;
-		}
-	parseCfgEnd:
-		::CloseHandle(hCfgFile);
-	}
-	return value;
-}
-
-// script_module_path
-char* GetScriptPaths(void)
-{
-	char* game = GetCfgFromFile("game", "cam.cfg");
-	if (!game)
-		return NULL;
-	char* cfg = reinterpret_cast<char*>(::alloca(24 + ::strlen(game)));
-	::strcpy(cfg,game);
-	::strcat(cfg,"_include_install_cfg");
-	delete[] game;
-	char* cfgfile = GetCfgFromFile(cfg, "cam.cfg");
-	if (!cfgfile)
-		return NULL;
-
-	char* paths = GetCfgFromFile("script_module_path", cfgfile);
-	delete[] cfgfile;
-
-	return paths;
-}
-
-char* FindScriptModule(const char* pszName, const char* pszPaths)
-{
-	char filepath[160];
-	if (!pszPaths || !*pszPaths)
-	{
-		::strcpy(filepath, pszName);
-		if (!::strchr(filepath, '.'))
-		{
-			::strcat(filepath, ".osm");
-		}
-		if (::GetFileAttributesA(filepath) != 0xFFFFFFFFUL)
-		{
-			char* ret = new(std::nothrow) char[::strlen(filepath)+1];
-			if (ret)
-				::strcpy(ret,filepath);
-			return ret;
-		}
-		return NULL;
-	}
-	char* scrpaths = reinterpret_cast<char*>(::alloca(::strlen(pszPaths) + 1));
-	::strcpy(scrpaths,pszPaths);
-	char* tok = scrpaths;
-	for (char* path = strsep(&tok, "+"); path; path = strsep(&tok, "+"))
-	{
-		while (::isspace(*path)) ++path;
-		if (!*path)
-			continue;
-		::strcpy(filepath, path);
-		::strcat(filepath, "\\");
-		::strcat(filepath, pszName);
-		if (!::strchr(pszName, '.'))
-			::strcat(filepath, ".osm");
-		if (::GetFileAttributesA(filepath) != 0xFFFFFFFFUL)
-		{
-			char* ret = new(std::nothrow) char[::strlen(filepath)+1];
-			if (ret)
-				::strcpy(ret,filepath);
-			return ret;
-		}
-	}
-	return NULL;
 }
 
 bool CheckFileVersion(const char* pszFile, ulong dwVersHigh, ulong dwVersLow)
@@ -357,64 +238,6 @@ char* GetObjectParamsCompatible(int iObjId)
 	return pRet;
 }
 
-// And because Thief 1 has a different call signature with no way around it...
-// Script modules aren't allowed to create their own cScrMsg objects, or this
-// would be much easier.
-static void DoPostMessage(int iSrc, int iDest, const char* pszMsg)
-{
-#ifdef __GNUC__
-	asm("push edi\n"
-	"\tmov edi,esp\n"
-	"\tsub esp,0x28\n"
-	"\tlea eax,[edi-0x8]\n"
-	"\tmov dword ptr [edi-0x8],0x0\n"
-	"\tmov dword ptr [edi-0x4],0x0\n"
-	"\tmov dword ptr [esp+0x1C],0x8\n"
-	"\tmov dword ptr [esp+0x18],eax\n"
-	"\tmov dword ptr [esp+0x14],eax\n"
-	"\tmov dword ptr [esp+0x10],eax\n"
-	"\tmov eax,%0\n"
-	"\tmov ecx,%3\n"
-	"\tmov edx,dword ptr [eax]\n"
-	"\tmov dword ptr [esp+0xC],ecx\n"
-	"\tmov ecx,%2\n"
-	"\tmov dword ptr [esp+0x8],ecx\n"
-	"\tmov ecx,%1\n"
-	"\tmov dword ptr [esp+0x4],ecx\n"
-	"\tmov dword ptr [esp],eax\n"
-	"\tcall dword ptr [edx+0x6C]\n"
-	"\tmov esp,edi\n"
-	"\tpop edi\n"
-	:: "m"(g_pScriptManager), "g"(iSrc), "g"(iDest), "g"(pszMsg)
-	);
-#else
-	_asm {
-		push edi
-		mov  edi,esp
-		sub  esp,0x28
-		lea  eax,[edi-0x8]
-		mov  dword ptr [edi-0x8],0x0
-		mov  dword ptr [edi-0x4],0x0
-		mov  dword ptr [esp+0x1C],kScrMsgPostToOwner
-		mov  dword ptr [esp+0x18],eax
-		mov  dword ptr [esp+0x14],eax
-		mov  dword ptr [esp+0x10],eax
-		mov  eax,g_pScriptManager
-		mov  ecx,pszMsg
-		mov  edx,dword ptr [eax]
-		mov  dword ptr [esp+0xC],ecx
-		mov  ecx,dword ptr iDest
-		mov  dword ptr [esp+0x8],ecx
-		mov  ecx,dword ptr iSrc
-		mov  dword ptr [esp+0x4],ecx
-		mov  dword ptr [esp],eax
-		call dword ptr [edx+0x6C]
-		mov  esp,edi
-		pop  edi
-	}
-#endif
-}
-
 void RelayCompatible(const char* pszMsg, int iObjId)
 {
 	SInterface<ILinkManager> pLM(g_pScriptManager);
@@ -434,8 +257,11 @@ void RelayCompatible(const char* pszMsg, int iObjId)
 	{
 		sLink sl;
 		pLQ->Link(&sl);
-		//g_pScriptManager->PostMessage2(iObjId, sl.dest, pszMsg, 0, 0, 0);
-		DoPostMessage(iObjId, sl.dest, pszMsg);
+#if (_DARKGAME == 1)
+		g_pScriptManager->PostMessage2(iObjId, sl.dest, pszMsg, 0, 0, 0);
+#else
+		g_pScriptManager->PostMessage2(iObjId, sl.dest, pszMsg, 0, 0, 0, 0);
+#endif
 	}
 }
 
@@ -446,6 +272,7 @@ int ShowBookCompatible(int iObjId, unsigned long ulTime)
 	if (-1 == pBookProp->GetID())
 	{
 		// Must be SShock2
+#if (_DARKGAME == 3)
 		pBookProp.reset(static_cast<IStringProperty*>(pPM->GetPropertyNamed("UseMsg")));
 		if (-1 != pBookProp->GetID()
 		 && pBookProp->IsRelevant(iObjId))
@@ -457,6 +284,7 @@ int ShowBookCompatible(int iObjId, unsigned long ulTime)
 			//pSGS->AddTranslatableText(pszBook, "error", 0, ulTime);
 			return 2;
 		}
+#endif
 		return 0;
 	}
 
@@ -492,4 +320,3 @@ int ShowBookCompatible(int iObjId, unsigned long ulTime)
 	}
 	return 0;
 }
-

@@ -24,8 +24,6 @@
 .SUFFIXES: .o .cpp .rc
 .PRECIOUS: %.o
 
-GAME = 2
-
 srcdir = .
 bindir = ./commonobj
 bin1dir = ./t1obj
@@ -128,7 +126,7 @@ $(bin3dir)/%_res.o: $(srcdir)/%.rc
 %.osm: %.o $(OSM_OBJS)
 	$(LD) $(LDFLAGS) $(LDDEBUG) $(LIBDIRS) -o $@ script.def $< $(OSM_OBJS) $(SCR2LIB) $(LIBS)
 
-all: $(bindirectories) script-t1.osm script-t2.osm script-ss2.osm version.osm
+all: $(bindirectories) script-t1.osm script-t2.osm script-ss2.osm version-t1.osm version-t2.osm version-ss2.osm
 
 clean:
 	$(RM) $(bindir)/* $(bin1dir)/* $(bin2dir)/* $(bin3dir)/*
@@ -187,8 +185,20 @@ script-t2.osm: $(SCR2_OBJS) $(BASE2_OBJS) $(BASE_OBJS) $(OSM_OBJS) $(MISC2_OBJS)
 script-ss2.osm: $(SCR3_OBJS) $(BASE3_OBJS) $(BASE_OBJS) $(OSM_OBJS) $(MISC3_OBJS) $(RES3_OBJS)
 	$(LD) $(LDFLAGS) -Wl,--image-base=0x11200000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR3LIB) $(LIBS)
 
-$(bindir)/scrversion.o: scrversion.cpp scrversion.h
+$(bindir)/T1scrversion.o: scrversion.cpp scrversion.h
+	$(CXX) $(CXXFLAGS) $(CXXDEBUG) $(DEFINES) $(GAME1) $(INCLUDES) -o $@ -c $<
+
+version-t1.osm: $(bindir)/T1scrversion.o $(OSM_OBJS) $(bindir)/scrversion_res.o
+	$(LD) $(LDFLAGS) -Wl,--image-base=0x12100000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR1LIB) $(LIBS) -lversion
+
+$(bindir)/T2scrversion.o: scrversion.cpp scrversion.h
+	$(CXX) $(CXXFLAGS) $(CXXDEBUG) $(DEFINES) $(GAME2) $(INCLUDES) -o $@ -c $<
+
+version-t2.osm: $(bindir)/T2scrversion.o $(OSM_OBJS) $(bindir)/scrversion_res.o
+	$(LD) $(LDFLAGS) -Wl,--image-base=0x12100000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR2LIB) $(LIBS) -lversion
+
+$(bindir)/SS2scrversion.o: scrversion.cpp scrversion.h
 	$(CXX) $(CXXFLAGS) $(CXXDEBUG) $(DEFINES) $(GAME3) $(INCLUDES) -o $@ -c $<
 
-version.osm: $(bindir)/scrversion.o $(OSM_OBJS) $(bindir)/scrversion_res.o
-	$(LD) $(LDFLAGS) -Wl,--image-base=0x12100000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR2LIB) $(LIBS) -lversion
+version-ss2.osm: $(bindir)/SS2scrversion.o $(OSM_OBJS) $(bindir)/scrversion_res.o
+	$(LD) $(LDFLAGS) -Wl,--image-base=0x12100000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR3LIB) $(LIBS) -lversion
