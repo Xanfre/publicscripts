@@ -96,11 +96,11 @@ cMemoryAllocator::~cMemoryAllocator()
 #endif
 }
 
+#ifdef DEBUG
 IMalloc* cMemoryAllocator::AttachMalloc(IMalloc* allocator, const char* module)
 {
 	assert(allocator != NULL);
 	allocator->QueryInterface(IID_IMalloc, reinterpret_cast<void**>(&m_alloc));
-#ifdef DEBUG
 	allocator->QueryInterface(IID_IDebugMalloc, reinterpret_cast<void**>(&m_dballoc));
 	// Because the module may be unloaded, a static buffer will cause problems.
 	// This memory will never be freed, a small price to pay.
@@ -109,10 +109,18 @@ IMalloc* cMemoryAllocator::AttachMalloc(IMalloc* allocator, const char* module)
 	strcpy(m_module, "cMemoryAllocator [");
 	strcat(m_module, module);
 	strcat(m_module, "]");
-#endif
 	assert(m_alloc != NULL);
 	return this;
 }
+#else
+IMalloc* cMemoryAllocator::AttachMalloc(IMalloc* allocator, const char*)
+{
+	assert(allocator != NULL);
+	allocator->QueryInterface(IID_IMalloc, reinterpret_cast<void**>(&m_alloc));
+	assert(m_alloc != NULL);
+	return this;
+}
+#endif
 
 ulong cMemoryAllocator::CountAlloc(void)
 {

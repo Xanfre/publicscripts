@@ -95,8 +95,8 @@ long __stdcall cScr_VersionCheck::ReceiveMessage(sScrMsg* pMsg, sMultiParm*, eSc
 				return 0;
 			}
 
-			std::auto_ptr<char> pszScriptPaths(GetScriptPaths());
-			std::auto_ptr<char> pszParams(GetObjectParamsCompatible(ObjId()));
+			std::unique_ptr<char> pszScriptPaths(GetScriptPaths());
+			std::unique_ptr<char> pszParams(GetObjectParamsCompatible(ObjId()));
 			char* pszScript;
 			char* pszToken = pszParams.get();
 			for (pszScript = strsep(&pszToken, ";"); pszScript; pszScript = strsep(&pszToken, ";"))

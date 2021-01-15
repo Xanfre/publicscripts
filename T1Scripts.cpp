@@ -1404,13 +1404,13 @@ void cScr_NumberButton::ActivateButton(object iFrobber)
 	{
 		cMultiParm mpTxRep;
 		pPS->Get(mpTxRep, ObjId(), "OTxtRepr0", NULL);
-		strTxRep = mpTxRep;
+		strTxRep = static_cast<const char*>(mpTxRep);
 	}
 	if (pPS->Possessed(ObjId(), "TrapQVar"))
 	{
 		cMultiParm mpQVar;
 		pPS->Get(mpQVar, ObjId(), "TrapQVar", NULL);
-		strQVar = mpQVar;
+		strQVar = static_cast<const char*>(mpQVar);
 	}
 	if (!strTxRep.IsEmpty() && !strQVar.IsEmpty())
 	{
