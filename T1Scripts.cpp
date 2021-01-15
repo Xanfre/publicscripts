@@ -647,7 +647,7 @@ long cScr_HiddenDoor::OnDoorOpen(sDoorMsg* pDoorMsg, cMultiParm& mpReply)
  */
 eDoorState cScr_NonAutoDoor::TargetState(eDoorState state)
 {
-	static const eDoorState _targ[5] = { kDoorStateClosed, kDoorStateOpen, kDoorStateOpen, kDoorStateHalted};
+	static const eDoorState _targ[5] = { kDoorStateClosed, kDoorStateOpen, kDoorStateClosed, kDoorStateOpen, kDoorStateHalted };
 	return _targ[state];
 }
 
@@ -708,7 +708,17 @@ long cScr_NonAutoDoor::OnFrobWorldEnd(sFrobMsg* pFrobMsg, cMultiParm& mpReply)
 	{
 		if (pFrobMsg->Frobber == StrToObject("Player"))
 			SetScriptData("PlayerFrob", 1);
-		pDS->ToggleDoor(ObjId());
+		if (IsScriptDataSet("BeforeHalt"))
+		{
+			// Magic number for kDoorOpening because we do not have access to it here.
+			if (static_cast<int>(GetScriptData("BeforeHalt")) == 2)
+				pDS->CloseDoor(ObjId());
+			else
+				pDS->OpenDoor(ObjId());
+			ClearScriptData("BeforeHalt");
+		}
+		else
+			pDS->ToggleDoor(ObjId());
 	}
 
 	return cBaseDoorScript::OnFrobWorldEnd(pFrobMsg, mpReply);
@@ -767,7 +777,6 @@ long cScr_NonAutoDoor::OnDoorOpening(sDoorMsg* pDoorMsg, cMultiParm& mpReply)
 	PingDoubles();
 	SService<ISoundScrSrv> pSound(g_pScriptManager);
 	true_bool _p;
-	pSound->HaltSchema(_p, ObjId(), "", 0);
 	pSound->PlayEnvSchema(_p, ObjId(),
 		static_cast<const char*>(StateChangeTags(pDoorMsg->ActionType, pDoorMsg->PrevActionType)),
 		ObjId(), 0, kEnvSoundOnObj);
@@ -780,7 +789,6 @@ long cScr_NonAutoDoor::OnDoorClosing(sDoorMsg* pDoorMsg, cMultiParm& mpReply)
 	PingDoubles();
 	SService<ISoundScrSrv> pSound(g_pScriptManager);
 	true_bool _p;
-	pSound->HaltSchema(_p, ObjId(), "", 0);
 	pSound->PlayEnvSchema(_p, ObjId(),
 		static_cast<const char*>(StateChangeTags(pDoorMsg->ActionType, pDoorMsg->PrevActionType)),
 		ObjId(), 0, kEnvSoundOnObj);
@@ -790,9 +798,9 @@ long cScr_NonAutoDoor::OnDoorClosing(sDoorMsg* pDoorMsg, cMultiParm& mpReply)
 
 long cScr_NonAutoDoor::OnDoorHalt(sDoorMsg* pDoorMsg, cMultiParm& mpReply)
 {
+	SetScriptData("BeforeHalt", pDoorMsg->PrevActionType);
 	SService<ISoundScrSrv> pSound(g_pScriptManager);
 	true_bool _p;
-	pSound->HaltSchema(_p, ObjId(), "", 0);
 	pSound->PlayEnvSchema(_p, ObjId(),
 		static_cast<const char*>(StateChangeTags(pDoorMsg->ActionType, pDoorMsg->PrevActionType)),
 		ObjId(), 0, kEnvSoundOnObj);
