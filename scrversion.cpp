@@ -44,6 +44,13 @@
 #include <windows.h>
 #include <winver.h>
 
+#if (__cplusplus >= 201103L)
+template <typename T>
+using SPtr = std::unique_ptr<T>;
+#else
+#define SPtr std::auto_ptr
+#endif
+
 
 static bool CheckFileVersion(const char* pszFile, ulong dwVersHigh, ulong dwVersLow);
 static void DoSuccess(int iObjId);
@@ -92,7 +99,7 @@ long __stdcall cScr_VersionCheck::ReceiveMessage(sScrMsg* pMsg, sMultiParm*, eSc
 				return 0;
 			}
 
-			std::unique_ptr<char> pszParams(GetObjectParamsCompatible(ObjId()));
+			SPtr<char> pszParams(GetObjectParamsCompatible(ObjId()));
 			char* pszScript;
 			char* pszToken = pszParams.get();
 			for (pszScript = strsep(&pszToken, ";"); pszScript; pszScript = strsep(&pszToken, ";"))

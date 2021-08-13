@@ -43,6 +43,13 @@
 #include <stdexcept>
 #include <memory>
 
+#if (__cplusplus >= 201103L)
+template <typename T>
+using SPtr = std::unique_ptr<T>;
+#else
+#define SPtr auto_ptr
+#endif
+
 using namespace std;
 
 
@@ -1183,7 +1190,7 @@ void cScr_QuickText::DisplayText(void)
 
 		SService<IDataSrv> pDS(g_pScriptManager);
 		SInterface<IGameStrings> pGS(g_pScriptManager);
-		unique_ptr<char> szBookFile (new char[strlen(mpBook) + 10]);
+		SPtr<char> szBookFile (new char[strlen(mpBook) + 10]);
 		strcpy(szBookFile.get(), "..\\books\\");
 		strcat(szBookFile.get(), mpBook);
 		cScrStr str;
@@ -2511,7 +2518,7 @@ long cScr_TrapQVarMis::OnSim(sSimMsg* pSimMsg, cMultiParm& mpReply)
 		if (pszInit)
 		{
 			char* pszName = NULL;
-			unique_ptr<char> pszParam (GetQVarParams(ObjId(), NULL, NULL, &pszName));
+			SPtr<char> pszParam (GetQVarParams(ObjId(), NULL, NULL, &pszName));
 			if (pszName)
 			{
 				int iInit;
@@ -2533,7 +2540,7 @@ long cScr_TrapQVarMis::OnSwitch(bool bTurnOn, sScrMsg* pMsg, cMultiParm& mpReply
 	char cOperation;
 	int iValue = 0;
 	char* pszName = NULL;
-	unique_ptr<char> pszParam (GetQVarParams(ObjId(), &cOperation, &iValue, &pszName));
+	SPtr<char> pszParam (GetQVarParams(ObjId(), &cOperation, &iValue, &pszName));
 	if (pszName)
 		SetQVar(pszName, TrapProcess(bTurnOn, cOperation, iValue, GetQVar(pszName)));
 
@@ -2554,7 +2561,7 @@ long cScr_TrapQVarCmp::OnSim(sSimMsg* pSimMsg, cMultiParm& mpReply)
 	if (! pSimMsg->fStarting)
 	{
 		char* pszName = NULL;
-		unique_ptr<char> pszParam (GetQVarParams(ObjId(), NULL, NULL, &pszName));
+		SPtr<char> pszParam (GetQVarParams(ObjId(), NULL, NULL, &pszName));
 		if (pszName)
 		{
 			SService<IQuestSrv> pQS(g_pScriptManager);
@@ -2582,7 +2589,7 @@ long cScr_TrigQVar::OnBeginScript(sScrMsg* pMsg, cMultiParm& mpReply)
 	{
 #endif
 	char* pszQVar = NULL;
-	unique_ptr<char> pszParam (GetQVarParams(ObjId(), NULL, NULL, &pszQVar));
+	SPtr<char> pszParam (GetQVarParams(ObjId(), NULL, NULL, &pszQVar));
 	if (pszQVar)
 	{
 		SService<IQuestSrv> pQS(g_pScriptManager);
@@ -2602,7 +2609,7 @@ long cScr_TrigQVar::OnEndScript(sScrMsg* pMsg, cMultiParm& mpReply)
 	{
 #endif
 	char* pszQVar = NULL;
-	unique_ptr<char> pszParam (GetQVarParams(ObjId(), NULL, NULL, &pszQVar));
+	SPtr<char> pszParam (GetQVarParams(ObjId(), NULL, NULL, &pszQVar));
 	if (pszQVar)
 	{
 		SService<IQuestSrv> pQS(g_pScriptManager);
@@ -2620,7 +2627,7 @@ long cScr_TrigQVar::OnQuestChange(sQuestMsg* pQuestMsg, cMultiParm& mpReply)
 	char cOp;
 	int iArg = 0;
 	char* pszQVar = NULL;
-	unique_ptr<char> pszParam (GetQVarParams(ObjId(), &cOp, &iArg, &pszQVar));
+	SPtr<char> pszParam (GetQVarParams(ObjId(), &cOp, &iArg, &pszQVar));
 	if (pszQVar)
 	{
 		if (!_stricmp(pQuestMsg->m_pName, pszQVar))
@@ -2676,7 +2683,7 @@ long cScr_TrigQVarChange::OnBeginScript(sScrMsg* pMsg, cMultiParm& mpReply)
 	if (!pNet->IsProxy(ObjId()))
 	{
 #endif
-	unique_ptr<char> pszQVar (GetQVar());
+	SPtr<char> pszQVar (GetQVar());
 	if (pszQVar.get())
 	{
 		SService<IQuestSrv> pQS(g_pScriptManager);
@@ -2695,7 +2702,7 @@ long cScr_TrigQVarChange::OnEndScript(sScrMsg* pMsg, cMultiParm& mpReply)
 	if (!pNet->IsProxy(ObjId()))
 	{
 #endif
-	unique_ptr<char> pszQVar (GetQVar());
+	SPtr<char> pszQVar (GetQVar());
 	if (pszQVar.get())
 	{
 		SService<IQuestSrv> pQS(g_pScriptManager);
@@ -2710,7 +2717,7 @@ long cScr_TrigQVarChange::OnEndScript(sScrMsg* pMsg, cMultiParm& mpReply)
 
 long cScr_TrigQVarChange::OnQuestChange(sQuestMsg* pQuestMsg, cMultiParm& mpReply)
 {
-	unique_ptr<char> pszQVar (GetQVar());
+	SPtr<char> pszQVar (GetQVar());
 	if (pszQVar.get())
 	{
 		if (!_stricmp(pQuestMsg->m_pName, pszQVar.get())
@@ -2732,7 +2739,7 @@ long cScr_TrapQVarRelay::OnSwitch(bool bTurnOn, sScrMsg* pMsg, cMultiParm& mpRep
 	char cOp;
 	int iArg = 0;
 	char* pszQVar = NULL;
-	unique_ptr<char> pszParam (GetQVarParams(ObjId(), &cOp, &iArg, &pszQVar));
+	SPtr<char> pszParam (GetQVarParams(ObjId(), &cOp, &iArg, &pszQVar));
 	if (pszQVar)
 	{
 		if (TrigProcess(cOp, iArg, GetQVar(ObjId(), pszQVar), pszParam.get()+1))
@@ -2789,7 +2796,7 @@ bool cScr_PostReader::DoQVar(void)
 	char cOperation;
 	int iValue = 0;
 	char* pszName = NULL;
-	unique_ptr<char> pszParam (GetQVarParams(ObjId(), &cOperation, &iValue, &pszName));
+	SPtr<char> pszParam (GetQVarParams(ObjId(), &cOperation, &iValue, &pszName));
 	if (!pszName)
 	{
 		return false;
