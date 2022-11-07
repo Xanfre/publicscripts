@@ -1,1 +1,4 @@
+*.lib
+*.exp
+*.manifest
 *.osm
