@@ -44,10 +44,10 @@ DLLTOOL = dlltool
 RC = windres
 MKDIR = mkdir -p
 
-DEFINES = -DWINVER=0x0400 -D_WIN32_WINNT=0x0400 -DWIN32_LEAN_AND_MEAN
-GAME1 = -D_DARKGAME=1 -D_NEWDARK
-GAME2 = -D_DARKGAME=2 -D_NEWDARK
-GAME3 = -D_DARKGAME=3 -D_NEWDARK
+DEFINES = -DWINVER=0x0400 -D_WIN32_WINNT=0x0400 -DWIN32_LEAN_AND_MEAN -D_NEWDARK
+GAME1 = -D_DARKGAME=1
+GAME2 = -D_DARKGAME=2
+GAME3 = -D_DARKGAME=3
 
 ifdef DEBUG
 DEFINES := $(DEFINES) -DDEBUG
@@ -126,7 +126,7 @@ $(bin3dir)/%_res.o: $(srcdir)/%.rc
 %.osm: %.o $(OSM_OBJS)
 	$(LD) $(LDFLAGS) $(LDDEBUG) $(LIBDIRS) -o $@ script.def $< $(OSM_OBJS) $(SCR2LIB) $(LIBS)
 
-all: $(bindirectories) script-t1.osm script-t2.osm script-ss2.osm version-t1.osm version-t2.osm version-ss2.osm
+all: $(bindirectories) script-t1.osm script-t2.osm script-ss2.osm version.osm
 
 clean:
 	$(RM) $(bindir)/* $(bin1dir)/* $(bin2dir)/* $(bin3dir)/*
@@ -185,20 +185,8 @@ script-t2.osm: $(SCR2_OBJS) $(BASE2_OBJS) $(BASE_OBJS) $(OSM_OBJS) $(MISC2_OBJS)
 script-ss2.osm: $(SCR3_OBJS) $(BASE3_OBJS) $(BASE_OBJS) $(OSM_OBJS) $(MISC3_OBJS) $(RES3_OBJS)
 	$(LD) $(LDFLAGS) -Wl,--image-base=0x11200000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR3LIB) $(LIBS)
 
-$(bindir)/T1scrversion.o: scrversion.cpp scrversion.h
-	$(CXX) $(CXXFLAGS) $(CXXDEBUG) $(DEFINES) $(GAME1) $(INCLUDES) -o $@ -c $<
-
-version-t1.osm: $(bindir)/T1scrversion.o $(OSM_OBJS) $(bindir)/scrversion_res.o
-	$(LD) $(LDFLAGS) -Wl,--image-base=0x12100000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR1LIB) $(LIBS) -lversion
-
-$(bindir)/T2scrversion.o: scrversion.cpp scrversion.h
-	$(CXX) $(CXXFLAGS) $(CXXDEBUG) $(DEFINES) $(GAME2) $(INCLUDES) -o $@ -c $<
-
-version-t2.osm: $(bindir)/T2scrversion.o $(OSM_OBJS) $(bindir)/scrversion_res.o
-	$(LD) $(LDFLAGS) -Wl,--image-base=0x12100000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR2LIB) $(LIBS) -lversion
-
-$(bindir)/SS2scrversion.o: scrversion.cpp scrversion.h
+$(bindir)/scrversion.o: scrversion.cpp scrversion.h
 	$(CXX) $(CXXFLAGS) $(CXXDEBUG) $(DEFINES) $(GAME3) $(INCLUDES) -o $@ -c $<
 
-version-ss2.osm: $(bindir)/SS2scrversion.o $(OSM_OBJS) $(bindir)/scrversion_res.o
-	$(LD) $(LDFLAGS) -Wl,--image-base=0x12100000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR3LIB) $(LIBS) -lversion
+version.osm: $(bindir)/scrversion.o $(OSM_OBJS) $(bindir)/scrversion_res.o
+	$(LD) $(LDFLAGS) -Wl,--image-base=0x12100000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR2LIB) $(LIBS) -lversion

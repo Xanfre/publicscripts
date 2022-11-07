@@ -29,8 +29,12 @@ extern IMalloc *g_pMalloc;
 extern IScriptMan *g_pScriptManager;
 
 typedef int (__cdecl *MPrintfProc)(const char*, ...);
+#ifdef __GNUC__
 // GCC 3.3 is foolishly trying to optimize away the dereference here.
 extern volatile MPrintfProc g_pfnMPrintf;
+#else
+extern MPrintfProc g_pfnMPrintf;
+#endif
 extern "C" int __declspec(dllexport) __stdcall ScriptModuleInit(const char*,IScriptMan*,MPrintfProc,IMalloc*,IScriptModule**);
 
 class cScriptModule : public cInterfaceImp<IScriptModule,IID_Def<IScriptModule>,kInterfaceImpStatic>
@@ -62,5 +66,5 @@ private:
 protected:
 	static const char* sm_ScriptModuleName;
 
-	friend int ScriptModuleInit(const char*,IScriptMan*,MPrintfProc,IMalloc*,IScriptModule**);
+	friend int __declspec(dllexport) __stdcall ScriptModuleInit(const char*,IScriptMan*,MPrintfProc,IMalloc*,IScriptModule**);
 };

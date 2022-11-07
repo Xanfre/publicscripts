@@ -35,6 +35,10 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#ifdef _MSC_VER
+#include <cstdarg>
+#define _USE_MATH_DEFINES
+#endif
 #include <cmath>
 #include <cctype>
 #include <list>
@@ -52,6 +56,32 @@ using SPtr = std::unique_ptr<T>;
 
 using namespace std;
 
+#if defined(_MSC_VER) && _MSC_VER < 1900
+#define snprintf c99_snprintf
+#define vsnprintf c99_vsnprintf
+__inline int c99_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap)
+{
+    int count = -1;
+
+    if (size != 0)
+        count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
+    if (count == -1)
+        count = _vscprintf(format, ap);
+
+    return count;
+}
+__inline int c99_snprintf(char *outBuf, size_t size, const char *format, ...)
+{
+    int count;
+    va_list ap;
+
+    va_start(ap, format);
+    count = c99_vsnprintf(outBuf, size, format, ap);
+    va_end(ap);
+
+    return count;
+}
+#endif
 
 /***
  * TrapMetaProp
@@ -902,7 +932,7 @@ long cScr_StimRepeater::OnTimer(sScrTimerMsg* pTimerMsg, cMultiParm& mpReply)
 {
 	if (!strcmp(pTimerMsg->name, "TimedStimThrob"))
 	{
-		StimLinks(m_iScale, true);
+		StimLinks(float(m_iScale), true);
 		m_iScale += 1;
 		return 0;
 	}
@@ -1609,9 +1639,9 @@ cScr_AlphaTrap::cScr_AlphaTrap(const char* pszName, int iHostObjId)
 		}
 		else if ((psz = GetParamString(pszParams, "rate")))
 		{
-			float fRate = strtod(psz, NULL);
+			double fRate = strtod(psz, NULL);
 			if (fRate != 0)
-				m_iFadeTime = 1000.0f * (m_fAlphaMax - m_fAlphaMin) / fRate;
+				m_iFadeTime = int(1000.0f * (m_fAlphaMax - m_fAlphaMin) / fRate);
 			g_pMalloc->Free(psz);
 		}
 		g_pMalloc->Free(pszParams);
@@ -1701,8 +1731,8 @@ long cScr_AlphaTrap::OnSwitch(bool bTurnOn, sScrMsg* pMsg, cMultiParm& mpReply)
 		float fCurrAlpha = mpAlpha;
 		if (bTurnOn)
 		{
-			int iAdjTime = double(m_iFadeTime) * (fCurrAlpha - m_fAlphaMin) / (m_fAlphaMax - m_fAlphaMin);
-			m_iStartTime = pMsg->time - iAdjTime;
+			double fAdjTime = double(m_iFadeTime) * (fCurrAlpha - m_fAlphaMin) / (m_fAlphaMax - m_fAlphaMin);
+			m_iStartTime = pMsg->time - int(fAdjTime);
 			if (m_iSign != 1)
 			{
 				m_iSign = 1;
@@ -1712,8 +1742,8 @@ long cScr_AlphaTrap::OnSwitch(bool bTurnOn, sScrMsg* pMsg, cMultiParm& mpReply)
 		}
 		else
 		{
-			int iAdjTime = double(m_iFadeTime) * (m_fAlphaMax - fCurrAlpha) / (m_fAlphaMax - m_fAlphaMin);
-			m_iStartTime = pMsg->time - iAdjTime;
+			double fAdjTime = double(m_iFadeTime) * (m_fAlphaMax - fCurrAlpha) / (m_fAlphaMax - m_fAlphaMin);
+			m_iStartTime = pMsg->time - int(fAdjTime);
 			if (m_iSign != -1)
 			{
 				m_iSign = -1;
@@ -3267,7 +3297,7 @@ long cScr_Squelch::OnSwitch(bool bTurnOn, sScrMsg* pMsg, cMultiParm& mpReply)
 		if (bool(mpOn) == bTurnOn)
 		{
 			cMultiParm mpTime = GetScriptData("LastTime");
-			if ((pMsg->time - int(mpTime)) <= iTiming)
+			if ((pMsg->time - int(mpTime)) <= uint(iTiming))
 				return 0;
 		}
 	}
@@ -3313,12 +3343,11 @@ int cScr_PropertyTrap::MatchFieldName(const char* name, const sFieldDesc* fields
 	ulong len = strlen(name);
 	int num = 0;
 	int i;
-	char *p;
-	p = strchr(name, '[');
+	const char *p = strchr(name, '[');
 	if (p)
 	{
-		len = p++ - name;
-		num = strtol(p, NULL, 10);
+		len = p - name;
+		num = strtol(p+1, NULL, 10);
 		if (num < 1) num = 1;
 	}
 	if (num > num_fields)

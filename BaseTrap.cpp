@@ -103,7 +103,7 @@ void cBaseTrap::InitTrapVars(void)
 		cMultiParm mpTiming;
 		pPropSrv->Get(mpTiming, ObjId(), TIMINGPROP, NULL);
 #if (_DARKGAME == 3)
-		m_iTiming = float(mpTiming) * 1000.0f;
+		m_iTiming = int(float(mpTiming) * 1000.0f);
 #else
 		m_iTiming = mpTiming;
 #endif

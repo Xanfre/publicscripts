@@ -37,16 +37,16 @@ bindirectories = $(bindir) $(bin1dir) $(bin2dir) $(bin3dir)
 LGDIR = ..\lg
 SCRLIBDIR = ..\ScriptLib
 DH2DIR = ..\DH2
-DH2LIB = dh2.lib
+DH2LIB = $(DH2DIR)\dh2.lib
 
-DEFINES = -D_MT -DWINVER=0x0400 -D_WIN32_WINNT=0x0400 -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS
+DEFINES = -D_MT -DWINVER=0x0400 -D_WIN32_WINNT=0x0400 -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_NEWDARK
 GAME1 = -D_DARKGAME=1
 GAME2 = -D_DARKGAME=2
 GAME3 = -D_DARKGAME=3
 
 !ifdef DEBUG
 DEFINES = $(DEFINES) -DDEBUG=1
-CXXDEBUG = -MTd -Od
+CXXDEBUG = -MDd -Od
 LDDEBUG = -DEBUG
 LGLIB = $(LGDIR)\lg-d.lib
 SCR1LIB = $(SCRLIBDIR)\ScriptLib1-d.lib
@@ -54,7 +54,7 @@ SCR2LIB = $(SCRLIBDIR)\ScriptLib2-d.lib
 SCR3LIB = $(SCRLIBDIR)\ScriptLib3-d.lib
 !else
 DEFINES = $(DEFINES) -DNDEBUG
-CXXDEBUG = -MT -O2
+CXXDEBUG = -MD -O2
 LDDEBUG = -RELEASE
 LGLIB = $(LGDIR)\lg.lib
 SCR1LIB = $(SCRLIBDIR)\ScriptLib1.lib
@@ -74,8 +74,8 @@ BASE1_OBJS = $(bin1dir)\BaseTrap.obj $(bin1dir)\BaseScript.obj $(bin1dir)\Common
 BASE2_OBJS = $(bin2dir)\BaseTrap.obj $(bin2dir)\BaseScript.obj $(bin2dir)\CommonScripts.obj
 BASE3_OBJS = $(bin3dir)\BaseTrap.obj $(bin3dir)\BaseScript.obj $(bin3dir)\CommonScripts.obj
 SCR1_OBJS = $(bin1dir)\PublicScripts.obj $(bin1dir)\T1Scripts.obj
-SCR2_OBJS = $(bin2dir)\PublicScripts.obj $(bin2dir)\T1Scripts.obj
-SCR3_OBJS = $(bin3dir)\PublicScripts.obj $(bin3dir)\T1Scripts.obj
+SCR2_OBJS = $(bin2dir)\PublicScripts.obj $(bin2dir)\T2Scripts.obj
+SCR3_OBJS = $(bin3dir)\PublicScripts.obj $(bin3dir)\SS2Scripts.obj
 MISC1_OBJS = $(bin1dir)\ScriptDef.obj $(bin1dir)\utils.obj
 MISC2_OBJS = $(bin2dir)\ScriptDef.obj $(bin2dir)\utils.obj
 MISC3_OBJS = $(bin3dir)\ScriptDef.obj $(bin3dir)\utils.obj
@@ -123,10 +123,11 @@ ALL3_OBJS = $(SCR3_OBJS) $(BASE3_OBJS) $(BASE_OBJS) $(OSM_OBJS) $(MISC3_OBJS) $(
 all: $(bindirectories) script-t1.osm script-t2.osm script-ss2.osm version.osm
 
 clean:
-	-del /y /q $(bindir)\*.*
-	-del /y /q $(bin1dir)\*.*
-	-del /y /q $(bin2dir)\*.*
-	-del /y /q $(bin3dir)\*.*
+	del /y /q $(bindir)\*.*
+	del /y /q $(bin1dir)\*.*
+	del /y /q $(bin2dir)\*.*
+	del /y /q $(bin3dir)\*.*
+	del /q *.osm *.lib *.exp *.manifest
 
 $(bindir):
 	mkdir $@

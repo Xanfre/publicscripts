@@ -23,16 +23,27 @@
 #include "Allocator.h"
 
 #include <cstring>
+#ifdef _MSC_VER
+#include <new>
+#endif
 
 #include <lg/scrmanagers.h>
 #include <lg/malloc.h>
 #include <windows.h>
 
+#ifdef _MSC_VER
+namespace std { const nothrow_t nothrow = nothrow_t(); }
+#endif
+
 static int __cdecl NullPrintf(const char*, ...);
 
 IMalloc *g_pMalloc = NULL;
 IScriptMan *g_pScriptManager = NULL;
+#ifdef __GNUC__
 volatile MPrintfProc g_pfnMPrintf = NullPrintf;
+#else
+MPrintfProc g_pfnMPrintf = NullPrintf;
+#endif
 
 cMemoryAllocator g_Allocator;
 cScriptModule  g_ScriptModule;

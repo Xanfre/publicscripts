@@ -25,7 +25,7 @@
 
 extern cMemoryAllocator g_Allocator;
 
-void* operator new(std::size_t size) throw (std::bad_alloc)
+void* operator new(std::size_t size) SPEC_THROW(std::bad_alloc)
 {
 	void* ptr = g_Allocator.Alloc(size);
 	if (!ptr)
@@ -33,7 +33,7 @@ void* operator new(std::size_t size) throw (std::bad_alloc)
 	return ptr;
 }
 
-void* operator new[](std::size_t size) throw (std::bad_alloc)
+void* operator new[](std::size_t size) SPEC_THROW(std::bad_alloc)
 {
 	void* ptr = g_Allocator.Alloc(size);
 	if (!ptr)
@@ -41,35 +41,35 @@ void* operator new[](std::size_t size) throw (std::bad_alloc)
 	return ptr;
 }
 
-void* operator new(std::size_t size, const std::nothrow_t&) throw()
+void* operator new(std::size_t size, const std::nothrow_t&) NO_THROW
 {
 	return g_Allocator.Alloc(size);
 }
 
-void* operator new[](std::size_t size, const std::nothrow_t&) throw()
+void* operator new[](std::size_t size, const std::nothrow_t&) NO_THROW
 {
 	return g_Allocator.Alloc(size);
 }
 
-void operator delete(void* ptr) throw()
+void operator delete(void* ptr) NO_THROW
 {
 	if (ptr)
 		g_Allocator.Free(ptr);
 }
 
-void operator delete[](void* ptr) throw()
+void operator delete[](void* ptr) NO_THROW
 {
 	if (ptr)
 		g_Allocator.Free(ptr);
 }
 
-void operator delete(void* ptr, const std::nothrow_t&) throw()
+void operator delete(void* ptr, const std::nothrow_t&) NO_THROW
 {
 	if (ptr)
 		g_Allocator.Free(ptr);
 }
 
-void operator delete[](void* ptr, const std::nothrow_t&) throw()
+void operator delete[](void* ptr, const std::nothrow_t&) NO_THROW
 {
 	if (ptr)
 		g_Allocator.Free(ptr);

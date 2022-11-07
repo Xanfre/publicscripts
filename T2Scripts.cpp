@@ -101,7 +101,7 @@ void cScr_Elemental::UpdateScale(void)
 		fScale = CalculateCurve(fScale, 0, 1, object(ObjId()));
 
 		mxs_vector vScale;
-		vScale.z = vScale.y = vScale.x = fScale;
+		vScale.z = vScale.y = vScale.x = float(fScale);
 		mpProp.Unset();
 		mpProp.pVector = &vScale;
 		mpProp.type = kMT_Vector;
@@ -247,7 +247,7 @@ long cScr_FireElement::OnDamage(sDamageScrMsg* pDmgMsg, cMultiParm& mpReply)
 		SService<IObjectSrv> pOS(g_pScriptManager);
 		object oObj, oHit;
 		pOS->Named(oObj, "WaterStim");
-		if (oObj && pDmgMsg->kind == oObj)
+		if (oObj && pDmgMsg->kind == int(oObj))
 		{
 			pOS->Named(oHit, "SteamPuff");
 		}
@@ -715,7 +715,7 @@ long cScr_VineShot::OnEndScript(sScrMsg* pMsg, cMultiParm& mpReply)
 long cScr_VineShot::OnPhysCollision(sPhysMsg* pPhysMsg, cMultiParm& mpReply)
 {
 	object iPlayer = StrToObject("Player");
-	if (pPhysMsg->collObj == iPlayer)
+	if (pPhysMsg->collObj == int(iPlayer))
 	{
 		SService<IObjectSrv> pOS(g_pScriptManager);
 		object oVines, oJunk;
@@ -2336,7 +2336,7 @@ void cScr_FactoryWork::GotoWayPt(object iTarget, eAIActionPriority iSpeed)
 {
 	SService<IAIScrSrv> pAISrv(g_pScriptManager);
 	true_bool __p;
-	if (m_iWayPtDest != iTarget)
+	if (m_iWayPtDest != int(iTarget))
 	{
 		pAISrv->MakeGotoObjLoc(__p, ObjId(), GetOwned(StrToObject("TrolPt")),
 						eAIScriptSpeed(iSpeed), iSpeed, cMultiParm::Undef);
