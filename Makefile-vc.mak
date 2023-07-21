@@ -169,7 +169,7 @@ $(bin1dir)\script.res: script.rc version.rc
 $(bin2dir)\script.res: script.rc version.rc
 $(bin3dir)\script.res: script.rc version.rc
 
-script-t1.osm: $(ALL1_OBJS)
+script-t1.osm: $(ALL1_OBJS) $(RES1_OBJS)
 	$(link) $(LDFLAGS) -base:0x11200000 $(LIBDIRS) -out:$@ $(ALL1_OBJS) $(SCR1LIB) $(DH2LIB) $(LIBS)
 
 script-t2.osm: $(ALL2_OBJS) $(RES2_OBJS)

@@ -32,16 +32,26 @@ bin3dir = ./ss2obj
 bindirectories = $(bindir) $(bin1dir) $(bin2dir) $(bin3dir)
 
 LGDIR = ../lg
-SCRLIBDIR = ../ScriptLib
-DH2DIR = ../DH2
+SCRLIBDIR = ../scriptlib
+DH2DIR = ../dh2
 DH2LIB = -ldh2
 
+TARGET ?=
+ifeq ($(TARGET),)
 CC = gcc
 CXX = g++
 AR = ar
 LD = g++
 DLLTOOL = dlltool
 RC = windres
+else
+CC = $(TARGET)-gcc
+CXX = $(TARGET)-g++
+AR = $(TARGET)-ar
+LD = $(TARGET)-g++
+DLLTOOL = $(TARGET)-dlltool
+RC = $(TARGET)-windres
+endif
 MKDIR = mkdir -p
 
 DEFINES = -DWINVER=0x0400 -D_WIN32_WINNT=0x0400 -DWIN32_LEAN_AND_MEAN -D_NEWDARK
@@ -60,7 +70,7 @@ SCR3LIB = -lScript3-d
 else
 DEFINES := $(DEFINES) -DNDEBUG
 CXXDEBUG = -O2
-LDDEBUG =
+LDDEBUG = -Wl,--strip-all
 LGLIB = -llg
 SCR1LIB = -lScript1
 SCR2LIB = -lScript2
