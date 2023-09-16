@@ -123,10 +123,10 @@ ALL3_OBJS = $(SCR3_OBJS) $(BASE3_OBJS) $(BASE_OBJS) $(OSM_OBJS) $(MISC3_OBJS) $(
 all: $(bindirectories) script-t1.osm script-t2.osm script-ss2.osm version.osm
 
 clean:
-	del /y /q $(bindir)\*.*
-	del /y /q $(bin1dir)\*.*
-	del /y /q $(bin2dir)\*.*
-	del /y /q $(bin3dir)\*.*
+	del /y /q $(bindir)\*.obj $(bindir)\*.res
+	del /y /q $(bin1dir)\*.obj $(bin1dir)\*.res
+	del /y /q $(bin2dir)\*.obj $(bin2dir)\*.res
+	del /y /q $(bin3dir)\*.obj $(bin3dir)\*.res
 	del /q *.osm *.lib *.exp *.manifest
 
 $(bindir):

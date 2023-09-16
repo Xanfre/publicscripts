@@ -75,6 +75,20 @@ void operator delete[](void* ptr, const std::nothrow_t&) NO_THROW
 		g_Allocator.Free(ptr);
 }
 
+#if __cplusplus >= 201402L
+void operator delete(void* ptr, std::size_t) NO_THROW
+{
+	if (ptr)
+		g_Allocator.Free(ptr);
+}
+
+void operator delete[](void* ptr, std::size_t) NO_THROW
+{
+	if (ptr)
+		g_Allocator.Free(ptr);
+}
+#endif
+
 cMemoryAllocator::AllocRecord cMemoryAllocator::nullrecord;
 
 cMemoryAllocator::cMemoryAllocator()

@@ -44,10 +44,6 @@ struct sMessageHandlerNode
 	const sMessageHandler* pData;
 
 	sMessageHandlerNode(const sMessageHandler* _data);
-	~sMessageHandlerNode() { }
-
-	sMessageHandlerNode& operator=(const sMessageHandlerNode& _r)
-		{ ulKey = _r.ulKey; pData = _r.pData; return *this; }
 
 	bool operator==(const char* _s);
 	bool operator!=(const char* _s);

@@ -82,9 +82,7 @@ LDFLAGS = -mwindows -mdll -static-libgcc -static-libstdc++ -Wl,--enable-auto-ima
 LIBDIRS = -L. -L$(LGDIR) -L$(SCRLIBDIR) -L$(DH2DIR)
 LIBS = $(DH2LIB) $(LGLIB) -luuid
 INCLUDES = -I. -I$(srcdir) -I$(LGDIR) -I$(SCRLIBDIR) -I$(DH2DIR)
-# If you care for this... # -Wno-unused-variable
-# A lot of the callbacks have unused parameters, so I turn that off.
-CXXFLAGS = -W -Wall -masm=intel
+CXXFLAGS = -Wall -Wextra -masm=intel
 DLLFLAGS = --add-underscore
 
 OSM_OBJS = $(bindir)/ScriptModule.o $(bindir)/Script.o $(bindir)/Allocator.o $(bindir)/exports.o
@@ -139,7 +137,7 @@ $(bin3dir)/%_res.o: $(srcdir)/%.rc
 all: $(bindirectories) script-t1.osm script-t2.osm script-ss2.osm version.osm
 
 clean:
-	$(RM) $(bindir)/* $(bin1dir)/* $(bin2dir)/* $(bin3dir)/*
+	$(RM) $(bindir)/*.o $(bin1dir)/*.o $(bin2dir)/*.o $(bin3dir)/*.o *.osm
 
 $(bindir):
 	$(MKDIR) $@

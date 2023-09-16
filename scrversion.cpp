@@ -38,17 +38,23 @@
 #include <cstring>
 #include <cstdlib>
 #include <cctype>
-#include <memory>
 #include <malloc.h>
 
 #include <windows.h>
 #include <winver.h>
 
 #if (__cplusplus >= 201103L)
-template <typename T>
-using SPtr = std::unique_ptr<T>;
+#include <memory>
+
+#define auto_str std::unique_ptr<char[]>
 #else
-#define SPtr std::auto_ptr
+struct auto_str
+{
+	char* s_;
+	auto_str(char* s): s_(s) { }
+	~auto_str() { delete[] s_; }
+	char* get() const { return s_; }
+};
 #endif
 
 
@@ -103,7 +109,7 @@ long __stdcall cScr_VersionCheck::ReceiveMessage(sScrMsg* pMsg, sMultiParm*, eSc
 				return 0;
 			}
 
-			SPtr<char> pszParams(GetObjectParamsCompatible(ObjId()));
+			auto_str pszParams(GetObjectParamsCompatible(ObjId()));
 			char* pszScript;
 			char* pszToken = pszParams.get();
 			for (pszScript = strsep(&pszToken, ";"); pszScript; pszScript = strsep(&pszToken, ";"))
@@ -133,8 +139,8 @@ long __stdcall cScr_VersionCheck::ReceiveMessage(sScrMsg* pMsg, sMultiParm*, eSc
 				if (2 == iScrFound)
 				{
 					strScrPath.Free();
-					SPtr<char> pszScriptPaths(GetScriptPaths());
-					SPtr<char> pszScriptFile(FindScriptModule(pszScript, pszScriptPaths.get()));
+					auto_str pszScriptPaths(GetScriptPaths());
+					auto_str pszScriptFile(FindScriptModule(pszScript, pszScriptPaths.get()));
 					if (!pszScriptFile.get())
 					{
 						DoFailure(ObjId());

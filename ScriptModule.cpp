@@ -103,7 +103,7 @@ STDMETHODIMP_(const sScrClassDesc*) cScriptModule::GetFirstClass(tScrIter* pIter
 STDMETHODIMP_(const sScrClassDesc*) cScriptModule::GetNextClass(tScrIter* pIterParam)
 {
 	const sScrClassDesc *pRet;
-	register unsigned int index = *reinterpret_cast<unsigned int*>(pIterParam);
+	REGISTER unsigned int index = *reinterpret_cast<unsigned int*>(pIterParam);
 	pRet = GetScript(++index);
 	*reinterpret_cast<unsigned int*>(pIterParam) = index;
 	return pRet;
