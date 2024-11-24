@@ -185,16 +185,16 @@ $(bin2dir)/script_res.o: script.rc version.rc
 $(bin3dir)/script_res.o: script.rc version.rc
 
 script-t1.osm: $(SCR1_OBJS) $(BASE1_OBJS) $(BASE_OBJS) $(OSM_OBJS) $(MISC1_OBJS) $(RES1_OBJS)
-	$(LD) $(LDFLAGS) -Wl,--image-base=0x11200000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR1LIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR1LIB) $(LIBS)
 
 script-t2.osm: $(SCR2_OBJS) $(BASE2_OBJS) $(BASE_OBJS) $(OSM_OBJS) $(MISC2_OBJS) $(RES2_OBJS)
-	$(LD) $(LDFLAGS) -Wl,--image-base=0x11200000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR2LIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR2LIB) $(LIBS)
 
 script-ss2.osm: $(SCR3_OBJS) $(BASE3_OBJS) $(BASE_OBJS) $(OSM_OBJS) $(MISC3_OBJS) $(RES3_OBJS)
-	$(LD) $(LDFLAGS) -Wl,--image-base=0x11200000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR3LIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR3LIB) $(LIBS)
 
 $(bindir)/scrversion.o: scrversion.cpp scrversion.h
 	$(CXX) $(CXXFLAGS) $(CXXDEBUG) $(DEFINES) $(GAME3) $(INCLUDES) -o $@ -c $<
 
 version.osm: $(bindir)/scrversion.o $(OSM_OBJS) $(bindir)/scrversion_res.o
-	$(LD) $(LDFLAGS) -Wl,--image-base=0x12100000 $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR2LIB) $(LIBS) -lversion
+	$(LD) $(LDFLAGS) $(LDDEBUG) $(LIBDIRS) -o $@ script.def $^ $(SCR2LIB) $(LIBS) -lversion
