@@ -33,6 +33,8 @@
 
 #ifdef _MSC_VER
 namespace std { const nothrow_t nothrow = nothrow_t(); }
+#else
+extern "C" { const void *__dyn_tls_init_callback = NULL; }
 #endif
 
 static int __cdecl NullPrintf(const char*, ...);
