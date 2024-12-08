@@ -487,7 +487,7 @@ long cScr_HotPlateCtrl::OnTweqComplete(sTweqMsg* pTweqMsg, cMultiParm& mpReply)
 		SService<IPropertySrv> pPS(g_pScriptManager);
 		cMultiParm mpJoint, mpAnim;
 		pPS->Get(mpJoint, ObjId(), "JointPos", "Joint 1");
-		pPS->Get(mpAnim, ObjId(), "", "Joint1AnimS");
+		pPS->Get(mpAnim, ObjId(), "StTweqJoints", "Joint1AnimS");
 
 		CDSend("HotPlateHeat", ObjId(), mpJoint);
 
