@@ -33,6 +33,41 @@
 using namespace std;
 
 
+bool CheckGame(const char *pszName)
+{
+	try
+	{
+		SService<IVersionSrv> pVS(g_pScriptManager);
+
+		cScrStr sGame;
+		pVS->GetGame(sGame);
+
+		if (stricmp(sGame, "dark"))
+		{
+			SService<IDebugScrSrv> pDSS(g_pScriptManager);
+			cScrStr nil;
+			pDSS->Log("OSM \"", pszName, "\" is not made for Shock\n", nil, nil, nil, nil, nil);
+			pDSS->MPrint("OSM \"", pszName, "\" is not made for Shock", nil, nil, nil, nil, nil);
+			return false;
+		}
+
+		SService<IEngineSrv> pES(g_pScriptManager);
+		if (!pES->ConfigIsDefined("dark1"))
+		{
+			SService<IDebugScrSrv> pDSS(g_pScriptManager);
+			cScrStr nil;
+			pDSS->Log("OSM \"", pszName, "\" is not made for Thief2\n", nil, nil, nil, nil, nil);
+			pDSS->MPrint("OSM \"", pszName, "\" is not made for Thief2", nil, nil, nil, nil, nil);
+			return false;
+		}
+	}
+	catch (no_interface&)
+	{
+	}
+	return true;
+}
+
+
 /***
  * TrapOffFilter
  */

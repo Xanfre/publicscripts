@@ -38,6 +38,39 @@
 using namespace std;
 
 
+bool CheckGame(const char *pszName)
+{
+	try
+	{
+		SService<IVersionSrv> pVS(g_pScriptManager);
+
+		cScrStr sGame;
+		pVS->GetGame(sGame);
+
+		if (stricmp(sGame, "dark"))
+		{
+			SService<IDebugScrSrv> pDSS(g_pScriptManager);
+			pDSS->Log("OSM \"", pszName, "\" is not made for Shock\n", cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null);
+			pDSS->MPrint("OSM \"", pszName, "\" is not made for Shock", cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null);
+			return false;
+		}
+
+		SService<IEngineSrv> pES(g_pScriptManager);
+		if (pES->ConfigIsDefined("dark1"))
+		{
+			SService<IDebugScrSrv> pDSS(g_pScriptManager);
+			pDSS->Log("OSM \"", pszName, "\" is not made for Thief1\n", cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null);
+			pDSS->MPrint("OSM \"", pszName, "\" is not made for Thief1", cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null);
+			return false;
+		}
+	}
+	catch (no_interface&)
+	{
+	}
+	return true;
+}
+
+
 /***
  * Burplauncher
  */

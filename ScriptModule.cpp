@@ -55,6 +55,8 @@ static int __cdecl NullPrintf(const char*, ...)
 	return 0;
 }
 
+bool CheckGame(const char *);
+
 cScriptModule::~cScriptModule()
 {
 	if (m_pszName != sm_ScriptModuleName)
@@ -134,6 +136,9 @@ ScriptModuleInit (const char* pszName,
 		g_pfnMPrintf = pfnMPrintf;
 
 	if (!g_pScriptManager || !g_pMalloc)
+		return 0;
+
+	if (!CheckGame(pszName))
 		return 0;
 
 	g_ScriptModule.SetName(pszName);

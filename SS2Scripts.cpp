@@ -34,6 +34,30 @@
 using namespace std;
 
 
+bool CheckGame(const char *pszName)
+{
+	try
+	{
+		SService<IVersionSrv> pVS(g_pScriptManager);
+
+		cScrStr sGame;
+		pVS->GetGame(sGame);
+
+		if (stricmp(sGame, "shock"))
+		{
+			SService<IDebugScrSrv> pDSS(g_pScriptManager);
+			pDSS->Log("OSM \"", pszName, "\" is not made for Thief\n", cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null);
+			pDSS->MPrint("OSM \"", pszName, "\" is not made for Thief", cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null, cScrStr::Null);
+			return false;
+		}
+	}
+	catch (no_interface&)
+	{
+	}
+	return true;
+}
+
+
 /***
  * NotifyRegion
  */

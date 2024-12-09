@@ -77,6 +77,9 @@ const sScrClassDesc cScriptModule::sm_ScriptsArray[] = {
 const unsigned int cScriptModule::sm_ScriptsArraySize = 1;
 
 
+bool CheckGame(const char *) { return true; }
+
+
 IScript* cScr_VersionCheck::MakeVersionCheck(const char* pszName, int iHostObjId)
 {
 	cScr_VersionCheck* pscrRet = new(std::nothrow) cScr_VersionCheck(pszName, iHostObjId);
