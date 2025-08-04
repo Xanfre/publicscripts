@@ -171,12 +171,15 @@ $(bin3dir)\script.res: script.rc version.rc
 
 script-t1.osm: $(ALL1_OBJS) $(RES1_OBJS)
 	$(link) $(LDFLAGS) -base:0x11200000 $(LIBDIRS) -out:$@ $(ALL1_OBJS) $(SCR1LIB) $(DH2LIB) $(LIBS)
+	mt -nologo -manifest script-t1.osm.manifest -outputresource:script-t1.osm;#1
 
 script-t2.osm: $(ALL2_OBJS) $(RES2_OBJS)
 	$(link) $(LDFLAGS) -base:0x11200000 $(LIBDIRS) -out:$@ $(ALL2_OBJS) $(SCR2LIB) $(DH2LIB) $(LIBS)
+	mt -nologo -manifest script-t2.osm.manifest -outputresource:script-t2.osm;#1
 
 script-ss2.osm: $(ALL3_OBJS) $(RES3_OBJS)
 	$(link) $(LDFLAGS) -base:0x11200000 $(LIBDIRS) -out:$@ $(ALL3_OBJS) $(SCR3LIB) $(DH2LIB) $(LIBS)
+	mt -nologo -manifest script-ss2.osm.manifest -outputresource:script-ss2.osm;#1
 
 $(bindir)\scrversion.res: $(srcdir)\scrversion.rc
 	$(rc) $(RCFLAGS) -fo$@ -r $(srcdir)\scrversion.rc
@@ -186,4 +189,5 @@ $(bindir)\scrversion.obj: $(srcdir)\scrversion.cpp $(srcdir)\scrversion.h
 
 version.osm: $(bindir)\scrversion.obj $(OSM_OBJS) $(bindir)\scrversion.res
 	$(link) $(LDFLAGS) -base:0x12100000 $(LIBDIRS) -out:$@ $** $(LIBS) $(SCR2LIB) $(LIBS) version.lib
+	mt -nologo -manifest version.osm.manifest -outputresource:version.osm;#1
 
